@@ -17,6 +17,7 @@ Python job scheduling for humans. Run Python functions (or any other callable) p
 - In-process scheduler for periodic jobs. No extra processes needed!
 - Very lightweight and no external dependencies.
 - Excellent test coverage.
+- Supports scheduling async coroutines.
 - Tested on Python and 3.7, 3.8, 3.9, 3.10, 3.11, 3.12
 
 Usage
@@ -24,7 +25,7 @@ Usage
 
 .. code-block:: bash
 
-    $ pip install schedule
+    $ pip install git+https://github.com/Pwnion/schedule.git
 
 .. code-block:: python
 
@@ -52,6 +53,38 @@ Usage
     while True:
         schedule.run_pending()
         time.sleep(1)
+
+.. code-block:: python
+
+    import schedule
+    import asyncio
+
+    async def job_async():
+        print("I'm working asynchronously...")
+        await asyncio.sleep(5)
+
+    schedule.every(10).seconds.do(job_async)
+    schedule.every(10).minutes.do(job_async)
+    schedule.every().hour.do(job_async)
+    schedule.every().day.at("10:30").do(job_async)
+    schedule.every(5).to(10).minutes.do(job_async)
+    schedule.every().monday.do(job_async)
+    schedule.every().wednesday.at("13:15").do(job_async)
+    schedule.every().day.at("12:42", "Europe/Amsterdam").do(job_async)
+    schedule.every().minute.at(":17").do(job_async)
+
+    async def job_with_argument_async(name):
+        print(f"I am {name}")
+        await asyncio.sleep(5)
+
+    schedule.every(10).seconds.do(job_with_argument_async, name="Peter")
+
+    async def execute():
+        while True:
+            await schedule.run_pending_async()
+            await asyncio.sleep(1)
+
+    asyncio.run(execute())
 
 Documentation
 -------------
